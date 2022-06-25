@@ -1,0 +1,25 @@
+{
+  "name": "wistia-challenge",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bryzaguy/wistia-challenge.git"
+  },
+  "author": "Bryant Syme",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bryzaguy/wistia-challenge/issues"
+  },
+  "homepage": "https://github.com/bryzaguy/wistia-challenge#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "nodemon": "^2.0.18",
+    "serve-index": "^1.9.1"
+  }
+}
