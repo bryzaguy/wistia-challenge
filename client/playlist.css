@@ -44,8 +44,15 @@ header {
   height: 56px;
 }
 
-.wistia_embed {
+.video {
+  position: relative;
   margin-right: 48px;
+}
+
+.video-title {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+  font-weight: 400;
 }
 
 .media {
@@ -55,4 +62,36 @@ header {
 .media-content {
   display: flex;
   align-items: center;
+}
+
+.countdown {
+  display: grid;
+  place-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: white;
+  background:rgba(0, 0, 0, 0.75);
+}
+
+.countdown-media {
+  display: grid;
+  place-items: center;
+  grid-gap: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.countdown-seconds {
+  display: grid;
+  place-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 5rem;
+  font-weight: bold;
 }
