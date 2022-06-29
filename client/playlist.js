@@ -24,6 +24,18 @@ var Playlist = {
   }
 };
 
+var VideoPlayer = {
+  render: function(media) {
+    document
+      .querySelector('.wistia_embed')
+      .classList.add('wistia_async_' + media.hashed_id);
+
+    document
+      .querySelector('.video-title')
+      .innerText = media.name;
+  }
+};
+
 (function() {
   document.addEventListener(
     'DOMContentLoaded',
@@ -34,9 +46,7 @@ var Playlist = {
           return;
         }
 
-        document
-          .querySelector('.wistia_embed')
-          .classList.add('wistia_async_' + medias[0].hashed_id);
+        VideoPlayer.render(medias[0]);
 
         medias.forEach(function(media) {
           Playlist.renderMedia(media);
