@@ -18,6 +18,56 @@ var Utils = {
     }
 
     return `${minutes}:${String(seconds).padStart(2, '0')}`;
+  },
+
+  cancellable: () => {
+    var cancelController = null, onabortCallbacks;
+
+    function createController() {
+      onabortCallbacks = [];
+      const controller = new AbortController();
+      controller.signal.onabort = () => {
+        onabortCallbacks.forEach(cb => cb());
+      };
+      return controller;
+    }
+
+    return {
+      reset: () => {
+        cancelController = null;
+      },
+      onCancel: (callback) => {
+        cancelController = cancelController || createController();
+        onabortCallbacks.unshift(callback);
+      },
+      cancel: () => {
+        if (cancelController) {
+          cancelController.abort();
+          cancelController = null;
+        }
+      }
+    };
+  },
+
+  timer: (seconds, onTick, cancellable) => {
+    var intervalId;
+
+    cancellable.onCancel(() => {
+      clearInterval(intervalId);
+    });
+
+    onTick(seconds);
+
+    intervalId = setInterval(() => {
+      seconds--;
+
+      if (seconds === 0) {
+        clearInterval(intervalId);
+        cancellable.reset();
+      }
+
+      onTick(seconds);
+    }, 1000);
   }
 };
 
