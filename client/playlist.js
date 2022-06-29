@@ -11,6 +11,11 @@ var Playlist = {
     return document.getElementById(hashedId);
   },
 
+  getNextHashedId: function() {
+    const notPlaying = '.media:not(.playing)';
+    return document.getElementById('medias').querySelector(notPlaying).id;
+  },
+
   hasPlayed: function(hashedId) {
     return this.getMediaNode(hashedId).getAttribute('data-played');
   },
@@ -52,6 +57,42 @@ var Playlist = {
 };
 
 var VideoPlayer = {
+  COUNTDOWN_SECONDS: 5,
+
+  renderCountdown: function(media, onComplete, cancellable) {
+    const resizedThumbnail = new URL(media.thumbnail.url);
+    resizedThumbnail.searchParams.set('image_crop_resized', '300x160');
+
+    document
+      .querySelector('.countdown-media-thumbnail')
+      .setAttribute('src', String(resizedThumbnail));
+
+    document
+      .querySelector('.countdown-media-title')
+      .innerText = media.name;
+
+    const countdown = document.querySelector('.countdown');
+    const seconds = document.querySelector('.countdown-seconds');
+
+    // display countdown timer.
+    countdown.style.display = null;
+
+    cancellable.onCancel(() => {
+      seconds.innerText = null;
+      countdown.style.display = 'none';
+    });
+
+    Utils.timer(this.COUNTDOWN_SECONDS, remaining => {
+      if (remaining > 0) {
+        seconds.innerText = remaining;
+      } else {
+        seconds.innerText = null;
+        countdown.style.display = 'none';
+        onComplete();
+      }
+    }, cancellable);
+  },
+
   configure: function(video, events) {
     Object.keys(events).forEach(key => {
       video.bind(key, () => {
@@ -72,15 +113,34 @@ var VideoPlayer = {
   }
 };
 
-function VideoLoadHandler() {
+function VideoLoadHandler(getMediaByHashedId) {
+  var cancellable = Utils.cancellable();
+
   const events = {
     'play': video => {
       Playlist.renderPlaying(video.hashedId(), true);
     },
     'end': video => {
-      Playlist.renderMediaEnded(video.hashedId());
+      const renderMediaEnded = () => Playlist.renderMediaEnded(video.hashedId());
+      const nextMedia = getMediaByHashedId(Playlist.getNextHashedId());
+
+      function onComplete() {
+        renderMediaEnded();
+
+        video.replaceWith(nextMedia.hashed_id, {
+          autoPlay: false
+        });
+      }
+
+      if (!Playlist.hasPlayed(nextMedia.hashed_id)) {
+        cancellable.onCancel(renderMediaEnded);
+        VideoPlayer.renderCountdown(nextMedia, onComplete, cancellable);
+      } else {
+        onComplete();
+      }
     },
     'beforereplace': video => {
+      cancellable.cancel();
       Playlist.renderPlaying(video.hashedId(), false);
     }
   };
@@ -106,7 +166,9 @@ function VideoLoadHandler() {
 
         VideoPlayer.render(medias[0]);
 
-        const handler = VideoLoadHandler();
+        const handler = VideoLoadHandler(
+          id => medias.find(media => media.hashed_id === id)
+        );
         window._wq = window._wq || [];
         _wq.push(W => W.api(handler));
 
