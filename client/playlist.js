@@ -7,11 +7,16 @@ var Playlist = {
     return axios.get(String(url));
   },
 
+  getMediaNode: function(hashedId) {
+    return document.getElementById(hashedId);
+  },
+
   renderMedia: function(media) {
     var template = document.getElementById('media-template');
     var clone = template.content.cloneNode(true);
     var el = clone.children[0];
 
+    el.setAttribute('id', media.hashed_id);
     el.querySelector('.thumbnail-content').setAttribute('src', media.thumbnail.url);
     el.querySelector('.title').innerText = media.name;
     el.querySelector('.duration').innerText = Utils.formatTime(media.duration);
@@ -21,10 +26,29 @@ var Playlist = {
     );
 
     document.getElementById('medias').appendChild(el);
+  },
+
+  renderPlaying: function(hashedId, isPlaying) {
+    const el = this.getMediaNode(hashedId);
+
+    if (isPlaying) {
+      el.classList.add('playing');
+    } else {
+      el.classList.remove('playing');
+    }
   }
 };
 
 var VideoPlayer = {
+  configure: function(video, events) {
+    Object.keys(events).forEach(key => {
+      video.bind(key, () => {
+        events[key](video);
+        return video.unbind;
+      });
+    });
+  },
+
   render: function(media) {
     document
       .querySelector('.wistia_embed')
@@ -35,6 +59,21 @@ var VideoPlayer = {
       .innerText = media.name;
   }
 };
+
+function VideoLoadHandler() {
+  const events = {
+    'play': video => {
+      Playlist.renderPlaying(video.hashedId(), true);
+    },
+    'beforereplace': video => {
+      Playlist.renderPlaying(video.hashedId(), false);
+    }
+  };
+
+  return video => {
+    VideoPlayer.configure(video, events);
+  };
+}
 
 (function() {
   document.addEventListener(
@@ -47,6 +86,10 @@ var VideoPlayer = {
         }
 
         VideoPlayer.render(medias[0]);
+
+        const handler = VideoLoadHandler();
+        window._wq = window._wq || [];
+        _wq.push(W => W.api(handler));
 
         medias.forEach(function(media) {
           Playlist.renderMedia(media);
