@@ -22,6 +22,26 @@ header {
 .thumbnail {
   height: 56px;
   margin-right: 12px;
+  position: relative;
+}
+
+.playing .thumbnail::after {
+  display: grid;
+  place-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  font-size: small;
+  font-weight: 400;
+  color: white;
+  content: "Playing";
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.thumbnail-content {
+  height: 56px;
 }
 
 .wistia_embed {

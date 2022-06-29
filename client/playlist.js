@@ -12,7 +12,7 @@ var Playlist = {
     var clone = template.content.cloneNode(true);
     var el = clone.children[0];
 
-    el.querySelector('.thumbnail').setAttribute('src', media.thumbnail.url);
+    el.querySelector('.thumbnail-content').setAttribute('src', media.thumbnail.url);
     el.querySelector('.title').innerText = media.name;
     el.querySelector('.duration').innerText = Utils.formatTime(media.duration);
     el.querySelector('.media-content').setAttribute(
