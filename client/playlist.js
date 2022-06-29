@@ -11,6 +11,10 @@ var Playlist = {
     return document.getElementById(hashedId);
   },
 
+  hasPlayed: function(hashedId) {
+    return this.getMediaNode(hashedId).getAttribute('data-played');
+  },
+
   renderMedia: function(media) {
     var template = document.getElementById('media-template');
     var clone = template.content.cloneNode(true);
@@ -40,6 +44,8 @@ var Playlist = {
 
   renderMediaEnded: function(hashedId) {
     const el = this.getMediaNode(hashedId);
+
+    el.setAttribute('data-played', true);
 
     document.getElementById('medias').appendChild(el); // Move to end
   }
@@ -81,6 +87,10 @@ function VideoLoadHandler() {
 
   return video => {
     VideoPlayer.configure(video, events);
+
+    if (!Playlist.hasPlayed(video.hashedId())) {
+      video.play();
+    }
   };
 }
 
