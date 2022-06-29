@@ -36,6 +36,12 @@ var Playlist = {
     } else {
       el.classList.remove('playing');
     }
+  },
+
+  renderMediaEnded: function(hashedId) {
+    const el = this.getMediaNode(hashedId);
+
+    document.getElementById('medias').appendChild(el); // Move to end
   }
 };
 
@@ -64,6 +70,9 @@ function VideoLoadHandler() {
   const events = {
     'play': video => {
       Playlist.renderPlaying(video.hashedId(), true);
+    },
+    'end': video => {
+      Playlist.renderMediaEnded(video.hashedId());
     },
     'beforereplace': video => {
       Playlist.renderPlaying(video.hashedId(), false);
