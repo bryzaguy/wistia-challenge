@@ -57,7 +57,22 @@ var Playlist = {
 
     el.setAttribute('data-played', true);
 
-    document.getElementById('medias').appendChild(el); // Move to end
+    const medias = document.getElementById('medias');
+
+    var foundElement = false
+    for (const media of medias.children) {
+      foundElement = foundElement || media === el;
+      if (foundElement) {
+        media.classList.add('shift-up');
+      }
+    }
+
+    medias.appendChild(el); // Move to end
+    setTimeout(() => {
+      for (const media of medias.children) {
+        media.classList.remove('shift-up');
+      }
+    }, 0);
   }
 };
 

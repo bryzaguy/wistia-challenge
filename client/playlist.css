@@ -1,3 +1,8 @@
+:root {
+  --media-spacing: 12px;
+  --media-height: 56px;
+}
+
 body {
   padding: 140px 80px;
 }
@@ -21,6 +26,7 @@ header {
 
 .thumbnail {
   height: 56px;
+  height: var(--media-height);
   margin-right: 12px;
   position: relative;
 }
@@ -42,6 +48,7 @@ header {
 
 .thumbnail-content {
   height: 56px;
+  height: var(--media-height);
 }
 
 .video {
@@ -56,7 +63,14 @@ header {
 }
 
 .media {
+  transition: 0.2s;
   margin-bottom: 12px;
+  margin-bottom: var(--media-spacing);
+}
+
+.media.shift-up {
+  transition: none;
+  transform: translateY(calc(var(--media-height) + var(--media-spacing)));
 }
 
 .media-content {
