@@ -7,6 +7,11 @@ var Playlist = {
     return axios.get(String(url));
   },
 
+  getHiddenMedias: function() {
+    var url = new URL(`http://localhost:3000/hidden-medias`);
+    return axios.get(String(url)).then(response => (response.data || []));
+  },
+
   getMediaNode: function(hashedId) {
     return document.getElementById(hashedId);
   },
@@ -158,11 +163,14 @@ function VideoLoadHandler(getMediaByHashedId) {
   document.addEventListener(
     'DOMContentLoaded',
     function() {
-      Playlist.getMedias().then(function(response) {
-        var medias = response.data;
-        if (!medias) {
+      const data = [Playlist.getMedias(), Playlist.getHiddenMedias()];
+      Promise.all(data).then(function([response, hidden]) {
+        const allMedias = response.data;
+        if (!allMedias) {
           return;
         }
+
+        const medias = allMedias.filter(media => !hidden[media.hashed_id]);
 
         VideoPlayer.render(medias[0]);
 
