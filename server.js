@@ -1,5 +1,4 @@
 const express = require('express');
-const serveIndex = require('serve-index');
 const livereload = require("livereload");
 const connectLiveReload = require("connect-livereload");
 
@@ -14,7 +13,6 @@ const app = express();
 const port = 3000;
 
 app.use(connectLiveReload());
-app.use(serveIndex('client'));
 app.use(express.static('client'));
 app.use(express.json())
 
