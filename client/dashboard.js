@@ -12,6 +12,20 @@ var Dashboard = {
     return axios.get(String(url)).then(response => (response.data || {}));
   },
 
+  setVisibility: function(hashedId, { hidden }) {
+    var url = new URL(`http://localhost:3000/hidden-medias/${hashedId}`);
+    return axios.put(String(url), { hidden });
+  },
+
+  onVisibilityClick: function(el) {
+    const hashedId = el.getAttribute('data-hashed-id');
+    const hidden = el.getAttribute('data-value') === 'hidden';
+
+    el.setAttribute('data-value', hidden ? 'visible' : 'hidden');
+    this.setVisibility(hashedId, { hidden: !hidden });
+    this.renderVisibility(el, { hidden: !hidden });
+  },
+
   renderTag: function(mediaEl, tag) {
     var template = document.getElementById('tag-template');
     var clone = template.content.cloneNode(true);
@@ -47,6 +61,8 @@ var Dashboard = {
     el.setAttribute('data-hashed-id', media.hashed_id);
 
     const toggle = el.querySelector('.visibility-toggle');
+    toggle.setAttribute('data-hashed-id', media.hashed_id);
+    toggle.setAttribute('data-value', media.hidden ? 'hidden' : 'visible');
     this.renderVisibility(toggle, { hidden: media.hidden });
 
     this.renderTags(el, ['tag-1', 'tag-2']);
@@ -77,7 +93,7 @@ var Dashboard = {
         response.data.map(function(media) {
           Dashboard.renderMedia({
             ...media,
-            hidden: hidden[media.hashedId] || false,
+            hidden: hidden[media.hashed_id] || false,
           });
         });
       });
@@ -89,7 +105,7 @@ var Dashboard = {
     'click',
     function(event) {
       if (event && event.target.matches('.visibility-toggle')) {
-        /* toggle visibility */
+        Dashboard.onVisibilityClick(event.target);
       }
 
       if (event && event.target.matches('.tag-button')) {
