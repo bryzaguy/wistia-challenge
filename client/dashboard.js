@@ -7,6 +7,12 @@ var Dashboard = {
     return axios.get(String(url));
   },
 
+  getPlayCount: function(hashedId) {
+    var url = new URL(`https://api.wistia.com/v1/stats/medias/${hashedId}.json`);
+    url.searchParams.set('api_password', TOKEN);
+    return axios.get(String(url)).then(response => (response.data || {}).play_count);
+  },
+
   getHiddenMedias: function() {
     var url = new URL(`http://localhost:3000/hidden-medias`);
     return axios.get(String(url)).then(response => (response.data || {}));
@@ -57,7 +63,7 @@ var Dashboard = {
     el.querySelector('.thumbnail').setAttribute('src', media.thumbnail.url);
     el.querySelector('.title').innerText = media.name;
     el.querySelector('.duration').innerText = Utils.formatTime(media.duration);
-    el.querySelector('.count').innerText = '?';
+    el.querySelector('.count').innerText = media.playCount;
     el.setAttribute('data-hashed-id', media.hashed_id);
 
     const toggle = el.querySelector('.visibility-toggle');
@@ -90,11 +96,16 @@ var Dashboard = {
     function() {
       const promises = [Dashboard.getMedias(), Dashboard.getHiddenMedias()];
       Promise.all(promises).then(function([response, hidden]) {
-        response.data.map(function(media) {
-          Dashboard.renderMedia({
+        const promises = response.data.map(async function(media) {
+          return {
             ...media,
             hidden: hidden[media.hashed_id] || false,
-          });
+            playCount: await Dashboard.getPlayCount(media.hashed_id)
+          };
+        });
+
+        Promise.all(promises).then(medias => {
+          medias.forEach(media => Dashboard.renderMedia(media));
         });
       });
     },
