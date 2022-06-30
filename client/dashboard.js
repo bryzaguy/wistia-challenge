@@ -7,6 +7,11 @@ var Dashboard = {
     return axios.get(String(url));
   },
 
+  getHiddenMedias: function() {
+    var url = new URL(`http://localhost:3000/hidden-medias`);
+    return axios.get(String(url)).then(response => (response.data || {}));
+  },
+
   renderTag: function(mediaEl, tag) {
     var template = document.getElementById('tag-template');
     var clone = template.content.cloneNode(true);
@@ -22,6 +27,14 @@ var Dashboard = {
     });
   },
 
+  renderVisibility: function(el, { hidden }) {
+    const hiddenEl = el.querySelector('.media--hidden');
+    hiddenEl.style.display = hidden ? null : 'none';
+
+    const visibleEl = el.querySelector('.media--visible');
+    visibleEl.style.display = hidden ? 'none' : null;
+  },
+
   renderMedia: function(media) {
     var template = document.getElementById('media-template');
     var clone = template.content.cloneNode(true);
@@ -32,6 +45,9 @@ var Dashboard = {
     el.querySelector('.duration').innerText = Utils.formatTime(media.duration);
     el.querySelector('.count').innerText = '?';
     el.setAttribute('data-hashed-id', media.hashed_id);
+
+    const toggle = el.querySelector('.visibility-toggle');
+    this.renderVisibility(toggle, { hidden: media.hidden });
 
     this.renderTags(el, ['tag-1', 'tag-2']);
 
@@ -56,9 +72,13 @@ var Dashboard = {
   document.addEventListener(
     'DOMContentLoaded',
     function() {
-      Dashboard.getMedias().then(function(response) {
+      const promises = [Dashboard.getMedias(), Dashboard.getHiddenMedias()];
+      Promise.all(promises).then(function([response, hidden]) {
         response.data.map(function(media) {
-          Dashboard.renderMedia(media);
+          Dashboard.renderMedia({
+            ...media,
+            hidden: hidden[media.hashedId] || false,
+          });
         });
       });
     },
